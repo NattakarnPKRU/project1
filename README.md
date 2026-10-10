@@ -13,7 +13,7 @@ combined data currently displayed.
 ## Dashboard
 
 - Thai-language sidebar filters for month, industry group, and product ranking.
-- Business-focused KPIs, including weighted MPI, change from the previous month,
+- Summary metrics, including weighted MPI, change from the previous month,
   total weight, and the highest-index product.
 - Monthly weighted MPI trend, product-group weight-share doughnut chart, and
   top-product ranking.

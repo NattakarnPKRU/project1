@@ -224,7 +224,7 @@ st.markdown(
 
 with st.sidebar:
     st.markdown("## 🔎 ปรับมุมมองข้อมูล")
-    st.caption("เลือกช่วงเวลาและกลุ่มสินค้า เพื่อดูภาพธุรกิจที่สนใจ")
+    st.caption("เลือกช่วงเวลาและกลุ่มสินค้าเพื่อกรองข้อมูล")
     selected_period = st.selectbox(
         "เดือนที่ต้องการวิเคราะห์",
         options=period_options,
@@ -260,7 +260,7 @@ with st.sidebar:
         help="เลือกจำนวนรายการที่ต้องการแสดงในกราฟจัดอันดับ",
     )
     st.divider()
-    st.markdown("### 📥 นำข้อมูลไปใช้ต่อ")
+    st.markdown("### 📥 ดาวน์โหลดข้อมูล")
     download = BytesIO()
     with pd.ExcelWriter(download, engine="openpyxl") as writer:
         data.to_excel(writer, sheet_name="MPI ครบทุกเดือน", index=False)
@@ -277,15 +277,15 @@ with st.sidebar:
         DATASET_URL,
         use_container_width=True,
     )
-    st.caption(f"ข้อมูลพร้อมใช้ {resource_count} เดือน · รวม {len(data):,} รายการ")
+    st.caption(f"ข้อมูล {resource_count} เดือน · รวม {len(data):,} รายการ")
 
 st.markdown(
     f"""
     <div class="mpi-hero">
-      <div class="mpi-eyebrow">Market pulse · MPI 2569</div>
-      <h1>ภาพรวมอุตสาหกรรมของคุณ</h1>
-      <p>ติดตามการเปลี่ยนแปลงดัชนีสินค้าและใช้ข้อมูลประกอบการวางแผนธุรกิจ
-      · อัปเดตล่าสุด {MONTH_NAMES_TH[latest_month]} {latest_year + 543}</p>
+      <div class="mpi-eyebrow">DATA DASHBOARD · MPI 2569</div>
+      <h1>ดัชนีผลผลิตอุตสาหกรรม</h1>
+      <p>สำรวจข้อมูลสินค้า กลุ่มอุตสาหกรรม และแนวโน้มรายเดือน
+      · ข้อมูลล่าสุด {MONTH_NAMES_TH[latest_month]} {latest_year + 543}</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -353,11 +353,9 @@ change_delta = (
 top_product = current_data.loc[current_data["IndexValue"].idxmax()]
 period_label = f"{MONTH_NAMES_TH[selected_month]} {selected_year + 543}"
 
+st.markdown(f"#### สรุปข้อมูล · {period_label}")
 st.markdown(
-    f"#### สรุปสำหรับผู้ประกอบการ · {period_label}"
-)
-st.markdown(
-    '<p class="mpi-section-note">ค่า MPI ถ่วงน้ำหนักช่วยให้เห็นภาพรวมของสินค้าที่มี Weight สูง</p>',
+    '<p class="mpi-section-note">ตัวชี้วัดสรุปจากข้อมูลในเดือนและกลุ่มที่เลือก</p>',
     unsafe_allow_html=True,
 )
 metric_columns = st.columns(4)
@@ -519,7 +517,7 @@ st.markdown(
     gap:1rem;flex-wrap:wrap;margin:.4rem 0 .7rem">
       <div>
         <h3 style="color:#183153;margin:0">สำรวจข้อมูลเชิงลึก</h3>
-        <span style="color:#64748b">เลือกมุมมองที่ต้องการ เพื่อใช้ประกอบการวางแผน</span>
+        <span style="color:#64748b">เลือกดูแนวโน้ม สัดส่วน และรายละเอียดสินค้า</span>
       </div>
       <span style="background:#e8f5f2;color:#167a68;padding:.4rem .75rem;
       border-radius:99px;font-weight:650">● {period_label}</span>
@@ -559,10 +557,9 @@ with product_tab:
             st.altair_chart(scatter_chart, width="stretch")
     with ranking_column:
         with st.container(border=True):
-            st.markdown("#### สินค้าที่ควรติดตาม")
+            st.markdown("#### รายละเอียดสินค้า")
             st.caption(
-                f"สินค้า «{top_product['CommodityNameTH']}» มี IndexValue สูงสุด "
-                f"ที่ {top_product['IndexValue']:,.2f}"
+                f"เรียง {len(top_items)} รายการตาม IndexValue จากมากไปน้อย"
             )
             st.dataframe(
                 top_items[
@@ -579,10 +576,9 @@ with product_tab:
                 hide_index=True,
                 height=420,
             )
-    st.info(
-        "แนวทางใช้งาน: ตรวจดัชนีสินค้าและน้ำหนักร่วมกัน "
-        "เพื่อจัดลำดับการติดตามวัตถุดิบ สต็อก และแผนการผลิต "
-        "โดยพิจารณาร่วมกับข้อมูลต้นทุนและคำสั่งซื้อของกิจการ"
+    st.caption(
+        "หมายเหตุ: Weight และ IndexValue เป็นค่าตามนิยามของชุดข้อมูลต้นทาง "
+        "ควรพิจารณาร่วมกับรายละเอียดและบริบทของแต่ละรายการ"
     )
 
 with data_tab:
