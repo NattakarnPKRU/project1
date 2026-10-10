@@ -12,10 +12,13 @@ combined data currently displayed.
 
 ## Dashboard
 
-- Monthly average `IndexValue` trend by product group.
-- Interactive month and product-group filters.
-- Top-products bar chart and `Weight` versus `IndexValue` scatter plot.
-- Summary metrics and a table of the selected month's records.
+- Thai-language sidebar filters for month, industry group, and product ranking.
+- Business-focused KPIs, including weighted MPI, change from the previous month,
+  total weight, and the highest-index product.
+- Monthly weighted MPI trend, product-group weight-share doughnut chart, and
+  top-product ranking.
+- Product-level `Weight` versus `IndexValue` scatter plot and data table.
+- Excel download for all months and CSV download for the filtered month.
 
 ## Run locally
 
