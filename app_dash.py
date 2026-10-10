@@ -9,7 +9,11 @@ import streamlit as st
 
 
 DATASET_ID = "gdpublish-69-dnp01-11-01"
-DATASET_API_URL = f"https://data.go.th/api/3/action/package_show?id={DATASET_ID}"
+PUBLISHER_DATASET_ID = "5fd1ccae-e476-4fc9-9348-b1eaed66e00b"
+DATASET_API_URL = (
+    "https://catalog.dnp.go.th/api/3/action/"
+    f"package_show?id={PUBLISHER_DATASET_ID}"
+)
 DATASET_URL = f"https://data.go.th/dataset/{DATASET_ID}"
 SNAPSHOT_FILE = Path(__file__).parent / "data" / "waste_management_2568_2569.xlsx"
 ALL = "ทั้งหมด"
@@ -65,6 +69,7 @@ def normalize_columns(data: pd.DataFrame) -> pd.DataFrame:
     data = data.rename(
         columns={
             "ใช้ประโยชน์ (กก.)": REUSED_COLUMN,
+            "นำไปใช้ประโยชน์ (กก.)": REUSED_COLUMN,
             "ร้อยละส่งกำจัดลดลง": "ร้อยละขยะส่งกำจัดลดลง",
         }
     ).copy()
@@ -97,10 +102,10 @@ def load_data() -> tuple[pd.DataFrame, int]:
     resources = [
         resource
         for resource in package["result"].get("resources", [])
-        if resource.get("format", "").upper() == "XLSX"
+        if resource.get("format", "").upper() == "CSV"
     ]
     if not resources:
-        raise ValueError("ชุดข้อมูลไม่มีไฟล์ XLSX")
+        raise ValueError("ชุดข้อมูลไม่มีไฟล์ CSV")
 
     frames = []
     for resource in resources:
@@ -109,7 +114,7 @@ def load_data() -> tuple[pd.DataFrame, int]:
             raise ValueError(f"ไม่พบ URL ของไฟล์ {resource.get('name', 'ไม่ทราบชื่อ')}")
         file_response = requests.get(url, timeout=(10, 60))
         file_response.raise_for_status()
-        frame = pd.read_excel(BytesIO(file_response.content), sheet_name=0)
+        frame = pd.read_csv(BytesIO(file_response.content), encoding="cp874")
         frames.append(normalize_columns(frame))
 
     data = pd.concat(frames, ignore_index=True)
@@ -133,9 +138,14 @@ except requests.RequestException as error:
         st.error(f"โหลดข้อมูลสำรองไม่สำเร็จ: {snapshot_error}")
         st.stop()
     resource_count = data["ปี"].nunique()
+    failure_reason = (
+        f"HTTP {error.response.status_code}"
+        if isinstance(error, requests.HTTPError) and error.response is not None
+        else type(error).__name__
+    )
     st.warning(
-        f"ไม่สามารถเชื่อมต่อ data.go.th ได้ ({error}) "
-        "จึงแสดงข้อมูลสำรองที่รวมอยู่ในโครงการ"
+        f"ดึงข้อมูลล่าสุดจากแหล่งข้อมูลของกรมไม่สำเร็จ ({failure_reason}) "
+        "ขณะนี้กำลังแสดงข้อมูลสำรองที่รวมอยู่ในโครงการ"
     )
 except (ValueError, KeyError) as error:
     st.error(f"โหลดชุดข้อมูลไม่สำเร็จ: {error}")

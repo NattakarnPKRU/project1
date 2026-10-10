@@ -4,12 +4,15 @@ Interactive dashboard for the solid-waste statistics published by Thailand's
 Department of National Parks, Wildlife and Plant Conservation on
 [data.go.th](https://data.go.th/dataset/gdpublish-69-dnp01-11-01).
 
-The dashboard combines the XLSX resources for B.E. 2568 and B.E. 2569 from the
-data.go.th CKAN API and refreshes them every six hours. It includes monthly
+The dashboard reads the latest CSV resources for B.E. 2568 and B.E. 2569 from
+the Department of National Parks' data catalog and refreshes them every six
+hours. It uses the publisher catalog directly because requests to the
+data.go.th API may be rejected with HTTP 403 in hosted environments. The CSV
+files use the Windows Thai (`cp874`) encoding. The dashboard includes monthly
 trends, waste handling totals, agency comparisons, interactive month and agency
-selection from charts, and a detailed filtered data table. If the API is
-temporarily unavailable, the bundled `data/waste_management_2568_2569.xlsx`
-snapshot is used.
+selection from charts, and a detailed filtered data table. If the publisher
+catalog is temporarily unavailable, the bundled
+`data/waste_management_2568_2569.xlsx` snapshot is used.
 
 ## Run locally
 
