@@ -1,21 +1,12 @@
 import hashlib
-from io import BytesIO
 from pathlib import Path
 
 import altair as alt
 import pandas as pd
-import requests
 import streamlit as st
 
 
-DATASET_ID = "gdpublish-69-dnp01-11-01"
-PUBLISHER_DATASET_ID = "5fd1ccae-e476-4fc9-9348-b1eaed66e00b"
-DATASET_API_URL = (
-    "https://catalog.dnp.go.th/api/3/action/"
-    f"package_show?id={PUBLISHER_DATASET_ID}"
-)
-DATASET_URL = f"https://data.go.th/dataset/{DATASET_ID}"
-SNAPSHOT_FILE = Path(__file__).parent / "data" / "waste_management_2568_2569.xlsx"
+WORKBOOK_FILE = Path(__file__).parent / "data" / "ปริมาณขยะมูลฝอย.xlsx"
 ALL = "ทั้งหมด"
 ALL_PERIODS = "รวมทุกเดือน"
 MONTHS_TH = [
@@ -91,65 +82,19 @@ def normalize_columns(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-@st.cache_data(ttl=6 * 60 * 60, show_spinner="กำลังดึงข้อมูลจาก data.go.th...")
-def load_data() -> tuple[pd.DataFrame, int]:
-    response = requests.get(DATASET_API_URL, timeout=(10, 30))
-    response.raise_for_status()
-    package = response.json()
-    if not package.get("success") or not isinstance(package.get("result"), dict):
-        raise ValueError(f"ไม่พบชุดข้อมูล {DATASET_ID} บน data.go.th")
-
-    resources = [
-        resource
-        for resource in package["result"].get("resources", [])
-        if resource.get("format", "").upper() == "CSV"
-    ]
-    if not resources:
-        raise ValueError("ชุดข้อมูลไม่มีไฟล์ CSV")
-
-    frames = []
-    for resource in resources:
-        url = resource.get("url")
-        if not url:
-            raise ValueError(f"ไม่พบ URL ของไฟล์ {resource.get('name', 'ไม่ทราบชื่อ')}")
-        file_response = requests.get(url, timeout=(10, 60))
-        file_response.raise_for_status()
-        frame = pd.read_csv(BytesIO(file_response.content), encoding="cp874")
-        frames.append(normalize_columns(frame))
-
-    data = pd.concat(frames, ignore_index=True)
+def load_data() -> pd.DataFrame:
+    if not WORKBOOK_FILE.is_file():
+        raise FileNotFoundError(f"ไม่พบไฟล์ข้อมูล {WORKBOOK_FILE.name}")
+    data = normalize_columns(pd.read_excel(WORKBOOK_FILE, sheet_name=0))
     if data.empty:
-        raise ValueError("ไม่พบรายการข้อมูลในไฟล์ของชุดข้อมูล")
-    return data, len(resources)
+        raise ValueError(f"ไม่พบรายการข้อมูลในไฟล์ {WORKBOOK_FILE.name}")
+    return data
 
 
 try:
-    data, resource_count = load_data()
-except requests.RequestException as error:
-    if not SNAPSHOT_FILE.is_file():
-        st.error(f"ดึงข้อมูลจาก data.go.th ไม่สำเร็จ: {error}")
-        st.link_button("เปิดชุดข้อมูลต้นทาง", DATASET_URL)
-        st.stop()
-    try:
-        data = normalize_columns(
-            pd.read_excel(SNAPSHOT_FILE, sheet_name="ข้อมูลขยะ")
-        )
-    except (OSError, ValueError, KeyError) as snapshot_error:
-        st.error(f"โหลดข้อมูลสำรองไม่สำเร็จ: {snapshot_error}")
-        st.stop()
-    resource_count = data["ปี"].nunique()
-    failure_reason = (
-        f"HTTP {error.response.status_code}"
-        if isinstance(error, requests.HTTPError) and error.response is not None
-        else type(error).__name__
-    )
-    st.warning(
-        f"ดึงข้อมูลล่าสุดจากแหล่งข้อมูลของกรมไม่สำเร็จ ({failure_reason}) "
-        "ขณะนี้กำลังแสดงข้อมูลสำรองที่รวมอยู่ในโครงการ"
-    )
-except (ValueError, KeyError) as error:
-    st.error(f"โหลดชุดข้อมูลไม่สำเร็จ: {error}")
-    st.link_button("เปิดชุดข้อมูลต้นทาง", DATASET_URL)
+    data = load_data()
+except (FileNotFoundError, OSError, ValueError, KeyError) as error:
+    st.error(f"อ่านไฟล์ Excel ไม่สำเร็จ: {error}")
     st.stop()
 
 available_periods = sorted(
@@ -338,7 +283,7 @@ with st.sidebar:
         use_container_width=True,
     )
     st.divider()
-    st.caption(f"ข้อมูล {resource_count} ไฟล์ · {len(data):,} แถว · {len(units)} หน่วยงาน")
+    st.caption(f"ข้อมูล {len(data):,} แถว · {len(units)} หน่วยงาน")
 
 filtered = data
 period_key = st.session_state["period_filter"]
@@ -707,6 +652,6 @@ with st.container(key=f"animated-dashboard-{view_signature}"):
 
 st.divider()
 st.caption(
-    f"แหล่งข้อมูล: กรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช · "
-    f"[data.go.th]({DATASET_URL}) · โหลดข้อมูลใหม่อัตโนมัติทุก 6 ชั่วโมง"
+    f"แหล่งข้อมูล: ไฟล์ {WORKBOOK_FILE.name} "
+    "จากกรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช"
 )
