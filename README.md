@@ -1,24 +1,15 @@
-# Streamlit Data Visualization
+# Waste Management Data Dashboard
 
-Interactive dashboard for the Industrial Production Index (MPI) dataset for
-2026 (B.E. 2569), published by the Electrical and Electronics Institute on
-[data.go.th](https://data.go.th/dataset/mpi-2569).
+Interactive dashboard for the solid-waste statistics published by Thailand's
+Department of National Parks, Wildlife and Plant Conservation on
+[data.go.th](https://data.go.th/dataset/gdpublish-69-dnp01-11-01).
 
-The app reads every XLS/XLSX monthly resource listed by the data.go.th CKAN API,
-combines the records, and refreshes the live data every six hours. If the API is
-temporarily unavailable, it clearly indicates that it is showing the bundled
-`data/mpi_2569.xlsx` snapshot instead. The dashboard also lets you download the
-combined data currently displayed.
-
-## Dashboard
-
-- Thai-language sidebar filters for month, industry group, and product ranking.
-- Summary metrics, including weighted MPI, change from the previous month,
-  total weight, and the highest-index product.
-- Monthly weighted MPI trend, product-group weight-share doughnut chart, and
-  top-product ranking.
-- Product-level `Weight` versus `IndexValue` scatter plot and data table.
-- CSV download for the filtered month.
+The dashboard combines the XLSX resources for B.E. 2568 and B.E. 2569 from the
+data.go.th CKAN API and refreshes them every six hours. It includes monthly
+trends, waste handling totals, agency comparisons, interactive month and agency
+selection from charts, and a detailed filtered data table. If the API is
+temporarily unavailable, the bundled `data/waste_management_2568_2569.xlsx`
+snapshot is used.
 
 ## Run locally
 
@@ -29,7 +20,7 @@ streamlit run app_dash.py
 
 ## Deploy to Streamlit Community Cloud
 
-1. Push this project to a GitHub repository.
+1. Push the project to a GitHub repository.
 2. In [Streamlit Community Cloud](https://share.streamlit.io/), choose **Create app**.
 3. Select the repository and branch, then set the main file path to `app_dash.py`.
 4. Choose **Deploy**. Dependencies are installed from `requirements.txt`.
