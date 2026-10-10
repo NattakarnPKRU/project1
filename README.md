@@ -18,7 +18,7 @@ combined data currently displayed.
 - Monthly weighted MPI trend, product-group weight-share doughnut chart, and
   top-product ranking.
 - Product-level `Weight` versus `IndexValue` scatter plot and data table.
-- Excel download for all months and CSV download for the filtered month.
+- CSV download for the filtered month.
 
 ## Run locally
 

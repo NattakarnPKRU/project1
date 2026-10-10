@@ -259,24 +259,6 @@ with st.sidebar:
         value=min(8, max(3, len(selected_products))),
         help="เลือกจำนวนรายการที่ต้องการแสดงในกราฟจัดอันดับ",
     )
-    st.divider()
-    st.markdown("### 📥 ดาวน์โหลดข้อมูล")
-    download = BytesIO()
-    with pd.ExcelWriter(download, engine="openpyxl") as writer:
-        data.to_excel(writer, sheet_name="MPI ครบทุกเดือน", index=False)
-    st.download_button(
-        "ดาวน์โหลด Excel ครบทุกเดือน",
-        data=download.getvalue(),
-        file_name="mpi_2569.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-        type="primary",
-    )
-    st.link_button(
-        "เปิดแหล่งข้อมูล data.go.th",
-        DATASET_URL,
-        use_container_width=True,
-    )
     st.caption(f"ข้อมูล {resource_count} เดือน · รวม {len(data):,} รายการ")
 
 st.markdown(
